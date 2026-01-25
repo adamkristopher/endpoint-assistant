@@ -1,6 +1,6 @@
 # Endpoint Assistant
 
-A TypeScript CLI tool for interacting with the [Endpoints](https://github.com/your-org/endpoints) API programmatically. Use it to list endpoints, inspect metadata, download files, and export data.
+A TypeScript CLI tool for interacting with the [Endpoints](https://endpoints.work) API programmatically. Use it to list endpoints, inspect metadata, download files, and export data.
 
 ## Features
 
@@ -46,7 +46,7 @@ Edit your `.env` file:
 
 ```env
 # Required: Your Endpoints API base URL
-ENDPOINTS_API_URL=https://app.endpoints.example.com
+ENDPOINTS_API_URL=https://endpoints.work
 
 # Required: Your API key (starts with ep_)
 ENDPOINTS_API_KEY=ep_your_api_key_here
@@ -321,4 +321,4 @@ MIT
 
 ---
 
-Built for use with [Endpoints](https://github.com/your-org/endpoints) - the document tracking platform with Living JSON.
+Built for use with [Endpoints](https://endpoints.work) - the document tracking platform with Living JSON.
