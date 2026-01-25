@@ -49,9 +49,16 @@ export async function inspect(endpointPath: string): Promise<void> {
   if (details.metadata.newMetadata.length > 0) {
     console.log("\n📝 Recent Metadata:\n");
     for (const item of details.metadata.newMetadata.slice(0, 3)) {
-      console.log(`  ID: ${item.id}`);
-      console.log(`  Created: ${item.createdAt}`);
-      console.log(`  Data: ${JSON.stringify(item.data, null, 2).split("\n").join("\n  ")}`);
+      console.log(`  File: ${item.filePath || "(text-only)"}`);
+      console.log(`  Type: ${item.fileType}`);
+      if (item.fileSize) {
+        console.log(`  Size: ${(item.fileSize / 1024).toFixed(1)} KB`);
+      }
+      console.log(`  Summary: ${item.summary}`);
+      if (item.entities.length > 0) {
+        console.log(`  Entities: ${item.entities.map(e => `${e.name} (${e.type})`).join(", ")}`);
+      }
+      console.log(`  Text: ${item.originalText.substring(0, 100)}...`);
       console.log("");
     }
   }

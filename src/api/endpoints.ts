@@ -15,10 +15,19 @@ interface TreeResponse {
   categories: TreeCategory[];
 }
 
+export interface ExtractedEntity {
+  name: string;
+  type: string;
+  role?: string;
+}
+
 export interface MetadataItem {
-  id: number;
-  data: Record<string, unknown>;
-  createdAt: string;
+  filePath: string | null;
+  fileType: string;
+  fileSize?: number;
+  originalText: string;
+  summary: string;
+  entities: ExtractedEntity[];
 }
 
 export interface EndpointDetails {
