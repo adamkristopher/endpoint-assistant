@@ -31,6 +31,38 @@ export class EndpointsClient {
     return this.handleResponse<T>(response);
   }
 
+  async delete<T>(path: string): Promise<T> {
+    const response = await fetch(`${this.baseUrl}${path}`, {
+      method: "DELETE",
+      headers: this.getHeaders(),
+    });
+
+    return this.handleResponse<T>(response);
+  }
+
+  async patch<T>(path: string, body: unknown): Promise<T> {
+    const response = await fetch(`${this.baseUrl}${path}`, {
+      method: "PATCH",
+      headers: {
+        ...this.getHeaders(),
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    });
+
+    return this.handleResponse<T>(response);
+  }
+
+  async postFormData<T>(path: string, formData: FormData): Promise<T> {
+    const response = await fetch(`${this.baseUrl}${path}`, {
+      method: "POST",
+      headers: this.getHeaders(),
+      body: formData,
+    });
+
+    return this.handleResponse<T>(response);
+  }
+
   private getHeaders(): Record<string, string> {
     return {
       Authorization: `Bearer ${this.apiKey}`,

@@ -100,6 +100,82 @@ describe("EndpointsClient", () => {
     // Assert
     expect(result).toEqual(responseData);
   });
+
+  it("makes DELETE request to correct URL", async () => {
+    // Arrange
+    const client = new EndpointsClient(mockSettings);
+    const mockFetch = vi.spyOn(global, "fetch").mockResolvedValue(
+      new Response(JSON.stringify({ success: true }), { status: 200 })
+    );
+
+    // Act
+    await client.delete("/api/endpoints/job-tracker/january-2026");
+
+    // Assert
+    expect(mockFetch).toHaveBeenCalledWith(
+      "http://localhost:3000/api/endpoints/job-tracker/january-2026",
+      expect.objectContaining({
+        method: "DELETE",
+        headers: expect.objectContaining({
+          Authorization: "Bearer ep_test_key_123",
+        }),
+      })
+    );
+  });
+
+  it("makes PATCH request with body", async () => {
+    // Arrange
+    const client = new EndpointsClient(mockSettings);
+    const mockFetch = vi.spyOn(global, "fetch").mockResolvedValue(
+      new Response(JSON.stringify({ success: true }), { status: 200 })
+    );
+    const body = { items: [{ data: { company: "Test" } }] };
+
+    // Act
+    await client.patch("/api/endpoints/job-tracker/january-2026", body);
+
+    // Assert
+    expect(mockFetch).toHaveBeenCalledWith(
+      "http://localhost:3000/api/endpoints/job-tracker/january-2026",
+      expect.objectContaining({
+        method: "PATCH",
+        body: JSON.stringify(body),
+        headers: expect.objectContaining({
+          "Content-Type": "application/json",
+          Authorization: "Bearer ep_test_key_123",
+        }),
+      })
+    );
+  });
+
+  it("makes POST request with FormData", async () => {
+    // Arrange
+    const client = new EndpointsClient(mockSettings);
+    const mockFetch = vi.spyOn(global, "fetch").mockResolvedValue(
+      new Response(JSON.stringify({ success: true }), { status: 200 })
+    );
+    const formData = new FormData();
+    formData.append("prompt", "test prompt");
+    formData.append("text", "test text");
+
+    // Act
+    await client.postFormData("/api/scan", formData);
+
+    // Assert
+    expect(mockFetch).toHaveBeenCalledWith(
+      "http://localhost:3000/api/scan",
+      expect.objectContaining({
+        method: "POST",
+        body: formData,
+        headers: expect.objectContaining({
+          Authorization: "Bearer ep_test_key_123",
+        }),
+      })
+    );
+    // Should NOT include Content-Type (browser sets it with boundary)
+    const callArgs = mockFetch.mock.calls[0][1] as RequestInit;
+    expect(callArgs.headers).not.toHaveProperty("Content-Type");
+  });
 });
 
 describe("getClient", () => {

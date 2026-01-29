@@ -10,7 +10,13 @@
     "start": "tsx src/index.ts",
     "overview": "tsx src/index.ts overview",
     "inspect": "tsx src/index.ts inspect",
-    "download": "tsx src/index.ts download"
+    "download": "tsx src/index.ts download",
+    "scan": "tsx src/index.ts scan",
+    "delete": "tsx src/index.ts delete",
+    "delete-item": "tsx src/index.ts delete-item",
+    "create": "tsx src/index.ts create",
+    "append": "tsx src/index.ts append",
+    "stats": "tsx src/index.ts stats"
   },
   "dependencies": {
     "dotenv": "^16.3.1"

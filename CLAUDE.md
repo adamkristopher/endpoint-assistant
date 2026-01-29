@@ -11,18 +11,28 @@ npm run overview                    # List all endpoints
 npm run inspect -- /path/to/endpoint   # Get endpoint details
 npm run download -- file-key        # Download a file
 npm start export /path/to/endpoint  # Export endpoint as JSON
+npm run scan -- "prompt" --text "text"     # Scan text with AI
+npm run scan -- "prompt" --file path       # Scan file with AI
+npm run delete -- /path             # Delete an endpoint
+npm run delete-item -- <id> /path   # Delete a single item
+npm run create -- /path             # Create an endpoint
+npm run append -- /path '[items]'   # Append items to endpoint
+npm run stats                       # Show billing stats
 ```
 
 ## Architecture
 
 ```
 src/
-├── index.ts              # CLI entry + high-level functions (overview, inspect, download, export)
+├── index.ts              # CLI entry + high-level functions
 ├── api/
-│   ├── files.ts          # getFileUrl(), downloadFile()
-│   └── endpoints.ts      # listEndpoints(), getEndpoint()
+│   ├── endpoints.ts      # listEndpoints, getEndpoint, deleteEndpoint, createEndpoint, appendItems
+│   ├── files.ts          # getFileUrl, downloadFile
+│   ├── items.ts          # deleteItem
+│   ├── scan.ts           # scanText, scanFiles
+│   └── billing.ts        # getBillingStats
 ├── core/
-│   └── client.ts         # EndpointsClient class with Bearer auth
+│   └── client.ts         # EndpointsClient class (get, post, delete, patch, postFormData)
 └── config/
     └── settings.ts       # getSettings(), validateSettings()
 ```
@@ -35,11 +45,19 @@ src/
 
 ### API Endpoints Used
 
-| Endpoint | Purpose |
-|----------|---------|
-| `GET /api/endpoints/tree` | List endpoints by category |
-| `GET /api/endpoints/[...path]` | Get endpoint metadata |
-| `GET /api/files/[...key]?format=json` | Get presigned S3 URL |
+| Endpoint | Method | Purpose |
+|----------|--------|---------|
+| `/api/endpoints/tree` | GET | List endpoints by category |
+| `/api/endpoints/[...path]` | GET | Get endpoint metadata |
+| `/api/endpoints/[...path]` | DELETE | Delete endpoint and files |
+| `/api/endpoints/[...path]` | PATCH | Append items to endpoint |
+| `/api/endpoints` | POST | Create new endpoint |
+| `/api/files/[...key]` | GET | Get presigned S3 URL |
+| `/api/items/[itemId]` | DELETE | Delete single item |
+| `/api/scan` | POST | Scan files/text with AI |
+| `/api/billing/stats` | GET | Get billing stats* |
+
+*Note: `/api/billing/stats` currently only supports session auth, not API key auth.
 
 ## Testing
 
