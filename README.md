@@ -24,7 +24,7 @@ A TypeScript CLI tool for interacting with the [Endpoints](https://endpoints.wor
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-org/endpoint-assistant.git
+git clone https://github.com/adamkristopher/endpoint-assistant.git
 cd endpoint-assistant
 
 # Install dependencies
