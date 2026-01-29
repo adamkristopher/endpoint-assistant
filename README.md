@@ -1,13 +1,19 @@
 # Endpoint Assistant
 
-A TypeScript CLI tool for interacting with the [Endpoints](https://endpoints.work) API programmatically. Use it to list endpoints, inspect metadata, download files, and export data.
+A TypeScript CLI tool for interacting with the [Endpoints](https://endpoints.work) API programmatically. Use it to list endpoints, inspect metadata, scan documents, manage items, and export data.
 
 ## Features
 
 - **List Endpoints** - View all your endpoints organized by category
 - **Inspect Metadata** - See Living JSON data for any endpoint
+- **Scan Documents** - Process files or text with AI extraction
+- **Create Endpoints** - Create new endpoints programmatically
+- **Append Items** - Add items to existing endpoints
+- **Delete Endpoints** - Remove endpoints and all associated files
+- **Delete Items** - Remove individual items from endpoints
 - **Download Files** - Fetch files via presigned S3 URLs
 - **Export Data** - Save endpoint data as JSON for analysis
+- **Billing Stats** - View usage and subscription information
 
 ## Prerequisites
 
@@ -94,28 +100,64 @@ Get detailed metadata for a specific endpoint:
 npm run inspect -- /job-tracker/january-2026
 ```
 
-Output:
+### Scan Text
+
+Process text with AI extraction:
+
+```bash
+npm run scan -- "track job applications" --text "Applied to Acme Corp as Engineer on Jan 15"
 ```
-📋 Endpoint Details
 
-──────────────────────────────────────────────────
-Path:     /job-tracker/january-2026
-Category: job-tracker
-Slug:     january-2026
-ID:       123
-──────────────────────────────────────────────────
-Total Items: 5
-  Old Metadata: 2
-  New Metadata: 3
+### Scan Files
 
-📝 Recent Metadata:
+Process files with AI extraction:
 
-  ID: 456
-  Created: 2026-01-15T10:30:00Z
-  Data: {
-    "company": "Acme Corp",
-    "position": "Software Engineer"
-  }
+```bash
+npm run scan -- "track job applications" --file ./resume.pdf
+```
+
+With a target endpoint:
+
+```bash
+npm run scan -- "track job applications" --file ./resume.pdf --target /job-tracker/january-2026
+```
+
+### Create an Endpoint
+
+Create a new empty endpoint:
+
+```bash
+npm run create -- /projects/q1-2026
+```
+
+Create with initial items:
+
+```bash
+npm run create -- /projects/q1-2026 --items '[{"data":{"name":"Project Alpha"}}]'
+```
+
+### Append Items to an Endpoint
+
+Add items to an existing endpoint:
+
+```bash
+npm run append -- /job-tracker/january-2026 '[{"data":{"company":"New Corp","position":"Developer"}}]'
+```
+
+### Delete an Endpoint
+
+Remove an endpoint and all its files:
+
+```bash
+npm run delete -- /job-tracker/january-2026
+```
+
+### Delete a Single Item
+
+Remove one item from an endpoint:
+
+```bash
+npm run delete-item -- abc12345 /job-tracker/january-2026
 ```
 
 ### Download a File
@@ -138,55 +180,138 @@ npm start export /job-tracker/january-2026
 
 Creates `results/job-tracker-january-2026.json`.
 
+### View Billing Stats
+
+Check your usage and subscription:
+
+```bash
+npm run stats
+```
+
+Output:
+```
+📊 Billing Stats
+
+──────────────────────────────────────────────────
+Tier:           hobby
+Status:         active
+Parses:         45 / 200
+Storage:        50.0 MB / 500.0 MB
+Period ends:    2/15/2026
+──────────────────────────────────────────────────
+```
+
 ## API Reference
 
-### Functions
-
-The following functions are available for programmatic use:
-
-#### `overview()`
-
-Lists all endpoints grouped by category.
+### High-Level Functions
 
 ```typescript
-import { overview } from "./src/index.js";
+import {
+  overview,
+  inspect,
+  scan,
+  create,
+  append,
+  removeEndpoint,
+  removeItem,
+  download,
+  exportEndpoint,
+  stats
+} from "./src/index.js";
 
+// List all endpoints
 await overview();
-```
 
-#### `inspect(path: string)`
-
-Displays detailed metadata for an endpoint.
-
-```typescript
-import { inspect } from "./src/index.js";
-
+// Inspect an endpoint
 await inspect("/job-tracker/january-2026");
-```
 
-#### `download(key: string, outputDir?: string)`
+// Scan text
+await scan("track jobs", { text: "Applied to Acme Corp" });
 
-Downloads a file to local filesystem.
+// Scan files
+await scan("track jobs", { file: "./resume.pdf" });
 
-```typescript
-import { download } from "./src/index.js";
+// Create endpoint
+await create("/projects/q1-2026");
 
-const savedPath = await download("123/job-tracker/file.pdf");
-// Returns: "/path/to/results/file.pdf"
-```
+// Append items
+await append("/job-tracker/january-2026", '[{"data":{}}]');
 
-#### `exportEndpoint(path: string)`
+// Delete endpoint
+await removeEndpoint("/job-tracker/january-2026");
 
-Exports endpoint data as JSON file.
+// Delete item
+await removeItem("abc12345", "/job-tracker/january-2026");
 
-```typescript
-import { exportEndpoint } from "./src/index.js";
+// Download file
+await download("123/job-tracker/file.pdf");
 
-const jsonPath = await exportEndpoint("/job-tracker/january-2026");
-// Returns: "/path/to/results/job-tracker-january-2026.json"
+// Export endpoint
+await exportEndpoint("/job-tracker/january-2026");
+
+// View billing stats
+await stats();
 ```
 
 ### Low-Level API Functions
+
+#### Endpoints API
+
+```typescript
+import {
+  listEndpoints,
+  getEndpoint,
+  deleteEndpoint,
+  createEndpoint,
+  appendItems
+} from "./src/api/endpoints.js";
+
+// List all endpoints by category
+const categories = await listEndpoints();
+
+// Get endpoint details
+const details = await getEndpoint("/job-tracker/january-2026");
+
+// Delete endpoint
+const result = await deleteEndpoint("/job-tracker/january-2026");
+
+// Create endpoint
+const endpoint = await createEndpoint("/projects/q1-2026", {
+  items: [{ data: { name: "Project" } }]
+});
+
+// Append items
+const updated = await appendItems("/job-tracker/january-2026", [
+  { data: { company: "New Corp" } }
+]);
+```
+
+#### Items API
+
+```typescript
+import { deleteItem } from "./src/api/items.js";
+
+// Delete a single item
+const result = await deleteItem("abc12345", "/job-tracker/january-2026");
+```
+
+#### Scan API
+
+```typescript
+import { scanText, scanFiles } from "./src/api/scan.js";
+
+// Scan text
+const result = await scanText("track jobs", "Applied to Acme Corp");
+
+// Scan files
+const file = new File([buffer], "resume.pdf");
+const result = await scanFiles("track jobs", [file]);
+
+// With target endpoint
+const result = await scanText("track jobs", "text", {
+  targetEndpoint: "/job-tracker/january-2026"
+});
+```
 
 #### Files API
 
@@ -196,25 +321,18 @@ import { getFileUrl, downloadFile } from "./src/api/files.js";
 // Get a presigned URL (expires in 1 hour by default)
 const { url, expiresIn } = await getFileUrl("123/path/to/file.pdf");
 
-// With custom expiration (seconds)
-const { url } = await getFileUrl("123/path/to/file.pdf", 7200);
-
 // Download file to disk
 const savedPath = await downloadFile("123/path/to/file.pdf", "./output/file.pdf");
 ```
 
-#### Endpoints API
+#### Billing API
 
 ```typescript
-import { listEndpoints, getEndpoint } from "./src/api/endpoints.js";
+import { getBillingStats } from "./src/api/billing.js";
 
-// List all endpoints by category
-const categories = await listEndpoints();
-// Returns: [{ name: "job-tracker", endpoints: [...] }, ...]
-
-// Get endpoint details
-const details = await getEndpoint("/job-tracker/january-2026");
-// Returns: { endpoint: {...}, metadata: { oldMetadata: [...], newMetadata: [...] }, totalItems: 5 }
+// Get billing stats
+const stats = await getBillingStats();
+// Returns: { tier, parsesThisMonth, monthlyParseLimit, storageUsed, ... }
 ```
 
 ## API Endpoints
@@ -225,7 +343,15 @@ This tool interacts with the following Endpoints API routes:
 |----------|--------|-------------|
 | `/api/endpoints/tree` | GET | List endpoints grouped by category |
 | `/api/endpoints/[...path]` | GET | Get endpoint details and metadata |
+| `/api/endpoints/[...path]` | DELETE | Delete endpoint and all files |
+| `/api/endpoints/[...path]` | PATCH | Append items to endpoint |
+| `/api/endpoints` | POST | Create new endpoint |
 | `/api/files/[...key]` | GET | Get presigned URL for file access |
+| `/api/items/[itemId]` | DELETE | Delete single item |
+| `/api/scan` | POST | Scan files/text with AI |
+| `/api/billing/stats` | GET | Get billing stats* |
+
+*Note: `/api/billing/stats` currently only supports session auth, not API key auth.
 
 All endpoints support Bearer token authentication:
 
@@ -240,8 +366,11 @@ endpoint-assistant/
 ├── src/
 │   ├── index.ts              # CLI entry point and high-level functions
 │   ├── api/
+│   │   ├── endpoints.ts      # Endpoint CRUD operations
 │   │   ├── files.ts          # File access (getFileUrl, downloadFile)
-│   │   └── endpoints.ts      # Endpoint listing and details
+│   │   ├── items.ts          # Item deletion
+│   │   ├── scan.ts           # AI scanning (scanText, scanFiles)
+│   │   └── billing.ts        # Billing stats
 │   ├── core/
 │   │   └── client.ts         # HTTP client with Bearer auth
 │   └── config/
@@ -286,9 +415,10 @@ it("returns presigned URL for valid file key", async () => {
 
 ### Adding New Features
 
-1. Write failing tests first (RED)
-2. Implement minimum code to pass (GREEN)
-3. Refactor while keeping tests green
+1. Add mock response to `tests/mocks/responses.ts`
+2. Write failing tests first (RED)
+3. Implement minimum code to pass (GREEN)
+4. Refactor while keeping tests green
 
 ## Troubleshooting
 
@@ -307,6 +437,10 @@ You're trying to access a file that doesn't belong to your account.
 ### "404 Not Found"
 
 The endpoint path doesn't exist. Use `npm run overview` to see available endpoints.
+
+### "429 Too Many Requests"
+
+You've exceeded your monthly parse limit. Upgrade your plan or wait until the next billing cycle.
 
 ## License
 
