@@ -122,6 +122,30 @@ With a target endpoint:
 npm run scan -- "track job applications" --file ./resume.pdf --target /job-tracker/january-2026
 ```
 
+### Prompt Routing
+
+The prompt parameter controls which endpoint items are added to:
+
+| Prompt Format | Behavior | Example |
+|---------------|----------|---------|
+| `category name` | Creates new endpoint with AI-generated slug | `"job tracker"` → `/job-tracker/january-2026` |
+| `category - slug` | Adds to existing endpoint | `"job-tracker - usds"` → `/job-tracker/usds` |
+
+**Examples:**
+
+```bash
+# Create new endpoint (AI determines slug based on content)
+npm run scan -- "job tracker" --text "Applied to Acme Corp"
+
+# Add to existing endpoint /job-tracker/usds
+npm run scan -- "job-tracker - usds" --text "Follow-up interview scheduled"
+
+# Add to existing endpoint /invoices/acme-corp
+npm run scan -- "invoices - acme-corp" --file ./invoice.pdf
+```
+
+Use `category - slug` format when adding multiple documents to the same endpoint.
+
 ### Create an Endpoint
 
 Create a new empty endpoint:
